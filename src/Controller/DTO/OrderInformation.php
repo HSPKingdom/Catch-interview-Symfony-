@@ -153,8 +153,27 @@ class OrderInformation implements JsonSerializable
         // Get average Price
         $averageUnitPrice = $orderTotalValue / $totalUnitCount;
 
-        // TODO: Calculate and Apply Discount
+        // Calculate and Apply Discount
+        $discount_list = array();
 
+        // Sort the discount list by priority
+        foreach ($this->discounts as $discount) {
+            $discount_list[$discount->getPriority()] = $discount;
+        }
+
+        // Apply discount by priority and type
+        foreach ($discount_list as $discount) {
+            // Case: Dollar, make sure
+            if ($discount->getType() == "DOLLAR" and $orderTotalValue >= $discount->getValue()) {
+                $orderTotalValue -= $discount->getValue();
+            } // Case: Dollar Discount Value > Order Value, Make Order Value to Zero
+            else if ($orderTotalValue < $discount->getValue()) {
+                $orderTotalValue = 0;
+            } // Case: Percentage Convert the percentage to cart discount percentage
+            else if ($discount->getType() == "PERCENTAGE") {
+                $orderTotalValue *= (1 - ($discount->getValue() / 100));
+            }
+        }
         // TODO: Return OrderExport Class
     }
 
