@@ -60,8 +60,11 @@ class OrderExportCommand extends Command
         $serializedData = $serializer->serialize($orderData, $output_format);
         $output->writeln("<fg=green>Done</>");
 
-        // TODO: Export to file
+        // Export to file
+        $this->writeToFile($output, $output_format, $serializedData);
 
+        // Display Success message
+        $output->writeln('<fg=green>Success</>');
 
         return 1;
     }
@@ -111,6 +114,44 @@ class OrderExportCommand extends Command
         }
 
         return $serializedOrders;
+
+    }
+
+    /**
+     * Write data into file with output filestream
+     *
+     * @param OutputInterface $output
+     * @param $output_format
+     * @param $serializedData
+     * @return void
+     */
+    public function writeToFile(OutputInterface $output, $output_format, $serializedData)
+    {
+        $fileLocation = $this->outputFilePath . $this->outputFilename . "." . $output_format;
+        $fileStartPosition = 0;
+        $fileReadSize = 2048;
+        $fileSize = strlen($serializedData);
+
+        $output->writeln("\n<fg=green>Exporting to file ".$fileLocation."</>");
+
+        //
+        $exportFile = fopen($fileLocation, 'w');
+        while ($fileSize > $fileStartPosition) {
+
+            // Input data into file
+            fputs($exportFile, substr($serializedData, $fileStartPosition, $fileReadSize));
+
+            // Select next writing chunk
+            $fileStartPosition += $fileReadSize;
+            if ($fileStartPosition > $fileSize) {
+                $fileStartPosition = $fileSize;
+            }
+
+            $output->writeln("<fg=green>Writing... \t".ceil(($fileStartPosition/$fileSize)*100)."%</>");
+
+        }
+
+        fclose($exportFile);
 
     }
 
