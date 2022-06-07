@@ -2,6 +2,7 @@
 
 namespace App\App\Commands;
 
+use App\Controller\DTO\OrderInformation;
 use App\Service\Serializer\DTOSerializer;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -22,6 +23,11 @@ class OrderExportCommand extends Command
     /** @var string */
     private $outputFilename = "out";
 
+    public function __construct()
+    {
+        $this->inputJsonLine = $_ENV['JSON_LINE_INPUT'];
+        parent::__construct();
+    }
 
     protected function configure()
     {
@@ -43,11 +49,11 @@ class OrderExportCommand extends Command
             return 0;   // Exit
         }
 
-        // TODO: Initialize Serializer
+        // Initialize Serializer
+        $serializer = new DTOSerializer();
 
-        // TODO: Deserialize JSON Object
-
-        // TODO: Analyse and Transform object to Exportable
+        // TODO: Deserialize JSON Object and Transform Object to exportable
+        $orderData = $this->getJsonLineAsClass($serializer, $output);
 
         // TODO: Serialize Data to output format
 
@@ -56,4 +62,47 @@ class OrderExportCommand extends Command
 
         return 1;
     }
+
+    /**
+     * Serialize Data to Class Object and transform it to OrderExport Class
+     *
+     * @param DTOSerializer $serializer
+     * @param OutputInterface $output
+     * @return array
+     */
+    public function getJsonLineAsClass(DTOSerializer $serializer, OutputInterface $output): array
+    {
+
+        //
+        $serializedOrders = array();
+
+
+        // Get JSON Line file from URL
+        $output->writeln("\n<fg=green>Reading File from :<href=" . $this->inputJsonLine . ">"
+            . $this->inputJsonLine . "</>...</>");
+        $json_file = fopen($this->inputJsonLine, "r");
+
+        // Open File stream and read line by line
+        if ($json_file) {
+            while (($line = fgets($json_file)) != false) {
+
+                // Deserialize
+                $orderInformation = $serializer->deserialize($line, OrderInformation::class, 'json');
+
+                // TODO: Get Cart Total, with discount applied
+
+                // TODO: If the total order value is 0, skipped in the export queue
+
+                // TODO: Add it in the export queue
+
+            }
+            fclose($json_file);
+
+            $output->writeln("<fg=green>Done</>");
+        }
+
+        return $serializedOrders;
+
+    }
+
 }

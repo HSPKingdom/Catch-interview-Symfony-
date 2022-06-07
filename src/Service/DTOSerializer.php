@@ -2,6 +2,7 @@
 
 namespace App\Service\Serializer;
 
+use App\Controller\DTO\OrderInformation;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
@@ -57,9 +58,9 @@ class DTOSerializer implements SerializerInterface
      * @param string $type
      * @param string $format
      * @param array $context
-     * @return array | mixed
+     * @return OrderInformation
      */
-    public function deserialize($data, string $type, string $format, array $context = []) : mixed
+    public function deserialize($data, string $type, string $format, array $context = []) : OrderInformation
     {
         return $this->serializer->deserialize($data, $type, $format, $context);
     }
