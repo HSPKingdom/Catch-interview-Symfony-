@@ -73,9 +73,8 @@ class OrderExportCommand extends Command
     public function getJsonLineAsClass(DTOSerializer $serializer, OutputInterface $output): array
     {
 
-        //
+        // Array for Export orders
         $serializedOrders = array();
-
 
         // Get JSON Line file from URL
         $output->writeln("\n<fg=green>Reading File from :<href=" . $this->inputJsonLine . ">"
