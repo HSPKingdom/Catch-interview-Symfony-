@@ -52,10 +52,13 @@ class OrderExportCommand extends Command
         // Initialize Serializer
         $serializer = new DTOSerializer();
 
-        // TODO: Deserialize JSON Object and Transform Object to exportable
+        // Deserialize JSON Object and Transform Object to exportable
         $orderData = $this->getJsonLineAsClass($serializer, $output);
 
         // TODO: Serialize Data to output format
+        $output->writeln("\n<fg=green>Serializing Data...</>");
+        $serializedData = $serializer->serialize($orderData, $output_format);
+        $output->writeln("<fg=green>Done</>");
 
         // TODO: Export to file
 
