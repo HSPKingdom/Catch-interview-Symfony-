@@ -7,14 +7,12 @@
         "php": ">=7.2.5",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "symfony/console": "*",
+        "symfony/console": "5.4.*",
         "symfony/dotenv": "*",
         "symfony/flex": "^1.17|^2",
         "symfony/framework-bundle": "*",
         "symfony/runtime": "*",
         "symfony/yaml": "*"
-    },
-    "require-dev": {
     },
     "config": {
         "allow-plugins": {
