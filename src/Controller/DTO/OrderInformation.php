@@ -3,6 +3,7 @@
 namespace App\Controller\DTO;
 
 use DateTime;
+use Exception;
 use JsonSerializable;
 
 class OrderInformation implements JsonSerializable
@@ -135,8 +136,10 @@ class OrderInformation implements JsonSerializable
 
     /**
      * Return the sum all item total value
-    **/
-    public function getOrderExportInformation(): void
+     *
+     * @return OrderExport
+     */
+    public function getOrderExportInformation(): OrderExport
     {
         // Calculate Order Value And analyse
         $orderTotalValue = 0;
@@ -174,7 +177,12 @@ class OrderInformation implements JsonSerializable
                 $orderTotalValue *= (1 - ($discount->getValue() / 100));
             }
         }
-        // TODO: Return OrderExport Class
+
+        $orderDate = new DateTime($this->orderDate);
+
+        // Construct Order Export class as data object
+        return new OrderExport($this->orderId, $orderDate->format(DateTime::ISO8601), $orderTotalValue, $averageUnitPrice
+            , $distinctUnitCount, $totalUnitCount, $this->getCustomer()->getShippingAddress()->getState());
     }
 
 
