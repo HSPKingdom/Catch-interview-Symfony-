@@ -72,6 +72,17 @@ class OrderItem implements JsonSerializable
     }
 
     /**
+     * Calculate and return total value of item
+     * Quantity * Unit_Price
+     *
+     * @return float
+     */
+    public function getItemTotalValue(): float
+    {
+        return $this->quantity * $this->unitPrice;
+    }
+
+    /**
      * @return array
      */
     public function jsonSerialize(): array
