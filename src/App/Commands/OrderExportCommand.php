@@ -31,6 +31,28 @@ class OrderExportCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        // Get Output Format
+        $output_format = $input->getArgument('output');
+        $output->writeln("<comment>User input:" . $output_format . "</comment>");
+
+        // If user argument output format not supported, Display error and exit
+        if ($output_format != "csv" and $output_format != "json" and $output_format != "yaml" and $output_format != "xml") {
+            $output->writeln("<comment>System only accept output format: csv, json, yaml, xml</comment>");
+            $output->writeln("<error>Output format not supported, please try again!</error>");
+            return 0;   // Exit
+        }
+
+        // TODO: Initialize Serializer
+
+        // TODO: Deserialize JSON Object
+
+        // TODO: Analyse and Transform object to Exportable
+
+        // TODO: Serialize Data to output format
+
+        // TODO: Export to file
+
+
         return 1;
     }
 }
