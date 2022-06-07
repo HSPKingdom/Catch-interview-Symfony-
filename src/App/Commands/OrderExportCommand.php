@@ -88,7 +88,9 @@ class OrderExportCommand extends Command
                 // Deserialize
                 $orderInformation = $serializer->deserialize($line, OrderInformation::class, 'json');
 
-                // TODO: Get Cart Total, with discount applied
+                // Get Cart Total, with discount applied
+                // TODO: Get return data from func
+                $orderInformation->getOrderExportInformation();
 
                 // TODO: If the total order value is 0, skipped in the export queue
 

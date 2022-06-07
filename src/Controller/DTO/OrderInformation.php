@@ -134,6 +134,32 @@ class OrderInformation implements JsonSerializable
     }
 
     /**
+     * Return the sum all item total value
+    **/
+    public function getOrderExportInformation(): void
+    {
+        // Calculate Order Value And analyse
+        $orderTotalValue = 0;
+        $totalUnitCount = 0;
+        $distinctUnitCount = 0;
+        foreach ($this->items as $item) {
+            // Calculate the order value before discount
+            $orderTotalValue += $item->getItemTotalValue();
+            // Calculate total number of units in the order
+            $totalUnitCount += $item->getQuantity();
+            // Unique units in the order
+            $distinctUnitCount += 1;
+        }
+        // Get average Price
+        $averageUnitPrice = $orderTotalValue / $totalUnitCount;
+
+        // TODO: Calculate and Apply Discount
+
+        // TODO: Return OrderExport Class
+    }
+
+
+    /**
      * @return array
      */
     public function jsonSerialize():array
