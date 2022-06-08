@@ -19,15 +19,9 @@ class OrderExportCommand extends Command
     // Console command to access this class
     protected static $defaultName = 'app:export-order';
 
-    // Define output file location
-    /** @var string */
-    private $outputFilePath = "./public/";
-    /** @var string */
-    private $outputFilename = "out";
-    /**
-     * @var string
-     */
     private $outputFileLocation = "./public/out.";
+
+    private $output_format;
 
     public function __construct()
     {
@@ -46,16 +40,18 @@ class OrderExportCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Get Output Format
-        $output_format = $input->getArgument('output');
-        $output->writeln("<comment>User input:" . $output_format . "</comment>");
+        $this->output_format = $input->getArgument('output');
+        $output->writeln("<comment>User input:" . $this->output_format . "</comment>");
 
         // If user argument output format not supported, Display error and exit
-        if ($output_format != "csv" and $output_format != "json" and $output_format != "yaml" and $output_format != "xml") {
+        if ($this->output_format != "csv" and $this->output_format != "json" and $this->output_format != "yaml" and
+            $this->output_format != "xml") {
+
             $output->writeln("<comment>System only accept output format: csv, json, yaml, xml</comment>");
             $output->writeln("<error>Output format not supported, please try again!</error>");
             return 0;   // Exit
         }
-        $this->outputFileLocation .= $output_format;
+        $this->outputFileLocation .= $this->output_format;
 
         // Initialize Serializer
         $serializer = new DTOSerializer();
@@ -65,8 +61,7 @@ class OrderExportCommand extends Command
 
         // Serialize Data to output format
         $output->writeln("\n<fg=green>Serializing Data...</>");
-        $serializedData = $serializer->serialize($orderData, $output_format);
-        dd($serializedData[0]);
+        $serializedData = $serializer->serialize($orderData, $this->output_format);
         $output->writeln("<fg=green>Done</>");
 
         // Export to file
@@ -77,6 +72,7 @@ class OrderExportCommand extends Command
 
         return 1;
     }
+
 
 
     /**
@@ -144,7 +140,6 @@ class OrderExportCommand extends Command
      * Write data into file with output filestream
      *
      * @param OutputInterface $output
-     * @param $output_format
      * @param $serializedData
      * @return void
      */
