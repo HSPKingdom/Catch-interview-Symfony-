@@ -24,10 +24,13 @@ composer install
 symfony console app:export-order <output_format>
   <output_format> : 
       default: csv
-      supports: csv, yaml, json, xml
+
+      supports: csv
 ```
+
 
 ## Note
 The repo was mirrored from my gitlab repo. To see all merge/pull request, please contact me for access to gitlab repo.
 
 Thanks
+
