@@ -66,6 +66,7 @@ class OrderExportCommand extends Command
         // Serialize Data to output format
         $output->writeln("\n<fg=green>Serializing Data...</>");
         $serializedData = $serializer->serialize($orderData, $output_format);
+        dd($serializedData[0]);
         $output->writeln("<fg=green>Done</>");
 
         // Export to file
@@ -76,6 +77,7 @@ class OrderExportCommand extends Command
 
         return 1;
     }
+
 
     /**
      * Serialize Data to Class Object and transform it to OrderExport Class
