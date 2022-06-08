@@ -44,8 +44,7 @@ class OrderExportCommand extends Command
         $output->writeln("<comment>User input:" . $this->output_format . "</comment>");
 
         // If user argument output format not supported, Display error and exit
-        if ($this->output_format != "csv" and $this->output_format != "json" and $this->output_format != "yaml" and
-            $this->output_format != "xml") {
+        if ($this->output_format != "csv") {
 
             $output->writeln("<comment>System only accept output format: csv, json, yaml, xml</comment>");
             $output->writeln("<error>Output format not supported, please try again!</error>");
@@ -53,39 +52,24 @@ class OrderExportCommand extends Command
         }
         $this->outputFileLocation .= $this->output_format;
 
+        // Process data and export to file with memory control
+        return $this->streamCSVProcess($output);
+    }
+
+    /**
+     * Stream the data process flow input and output with memory control
+     *
+     * @param OutputInterface $output
+     * @return int
+     */
+    public function streamCSVProcess(OutputInterface $output): int
+    {
+
         // Initialize Serializer
         $serializer = new DTOSerializer();
 
-        // Deserialize JSON Object and Transform Object to exportable
-        $orderData = $this->getJsonLineAsClass($serializer, $output);
-
-        // Serialize Data to output format
-        $output->writeln("\n<fg=green>Serializing Data...</>");
-        $serializedData = $serializer->serialize($orderData, $this->output_format);
-        $output->writeln("<fg=green>Done</>");
-
-        // Export to file
-        $this->writeToFile($output, $serializedData);
-
-        // Display Success message
-        $output->writeln('<fg=green>Success</>');
-
-        return 1;
-    }
-
-
-
-    /**
-     * Serialize Data to Class Object and transform it to OrderExport Class
-     *
-     * @param DTOSerializer $serializer
-     * @param OutputInterface $output
-     * @return array
-     */
-    public function getJsonLineAsClass(DTOSerializer $serializer, OutputInterface $output): array
-    {
-        // Array for Export orders
-        $serializedOrders = array();
+        // Show CSV header on the first Run
+        $firstLine = true;
 
         // Get JSON Line file from URL
         $output->writeln("\n<fg=green>Reading File from :<href=" . $this->inputJsonLine . ">"
@@ -97,13 +81,18 @@ class OrderExportCommand extends Command
             $output->writeln("\n<error>File format received: ".$path_info."</error>");
             $output->writeln("<error>This application only supports JSONL format as input file</error>");
             $output->writeln("<error>Please update the input source under .env</error>");
-            die();
+            return 0;
+        }
+
+        // Delete Existing file
+        if (file_exists($this->outputFileLocation)) {
+            unlink($this->outputFileLocation);
         }
 
         // Read file content
         if ( ($file_stream = fopen($this->inputJsonLine, "r"))!==false ){
 
-            // Reading line by line
+            // Reading lines by line
             while (($line = stream_get_line($file_stream, 20480, "\n")) != false) {
 
                 // Deserialize
@@ -117,24 +106,41 @@ class OrderExportCommand extends Command
                     $output->writeln("<comment>Order " . $orderExport->getOrderId() . " skipped, Total order value = 0</>");
                 } // Add it in the export queue
                 else {
-                    array_push($serializedOrders, $orderExport);
-                    $output->writeln("<fg=green>Order " . $orderExport->getOrderId() . " Processed</fg=green>");
+
+                    $output->writeln("\n<fg=green>Processing Order " . $orderExport->getOrderId() . "...</fg=green>");
+
+                    // Serialize Data
+                    $serializedData = $serializer->serialize($orderExport, $this->output_format);
+
+                    // Ignore CSV header if not the first run
+                    if ($firstLine and $this->output_format=="csv"){
+                        $firstLine = False;
+                    }
+                    else if (!$firstLine){
+                        $serializedData = preg_split('#\n#', $serializedData, 2)[1];
+                    }
+
+                    // export to file
+                    $this->writeToFile($output, $serializedData);
+
+                    $output->writeln("<fg=green>Processed</fg=green>");
                 }
 
             }
             fclose($file_stream);
 
-            $output->writeln("<fg=green>Done</>");
+            $output->writeln("\n\n<fg=green>Done</>");
         }
         // Return error if file cannot be opened
         else{
             $output->writeln("\n<error>Error</error>");
             $output->writeln("\n<error>Could not open file: ".$this->inputJsonLine."</error>");
             $output->writeln("<error>Please check the input source path under .env</error>");
-            die();
+            return 0;
         }
-        return $serializedOrders;
+        return 1;
     }
+
 
     /**
      * Write data into file with output filestream
@@ -146,13 +152,13 @@ class OrderExportCommand extends Command
     public function writeToFile(OutputInterface $output, $serializedData)
     {
         $fileStartPosition = 0;
-        $fileReadSize = 2048;
+        $fileReadSize = 1024;
         $fileSize = strlen($serializedData);
 
-        $output->writeln("\n<fg=green>Exporting to file ".$this->outputFileLocation."</>");
+        $output->writeln("<fg=green>Exporting to file</>");
 
         // Write to File
-        $exportFile = fopen($this->outputFileLocation, 'w');
+        $exportFile = fopen($this->outputFileLocation, 'a');
         while ($fileSize > $fileStartPosition) {
 
             // Input data into file
@@ -163,13 +169,9 @@ class OrderExportCommand extends Command
             if ($fileStartPosition > $fileSize) {
                 $fileStartPosition = $fileSize;
             }
-
             $output->writeln("<fg=green>Writing... \t".ceil(($fileStartPosition/$fileSize)*100)."%</>");
-
         }
-
         fclose($exportFile);
-
     }
 
 }
