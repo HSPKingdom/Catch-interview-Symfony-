@@ -56,7 +56,7 @@ class OrderExportCommand extends Command
         // Deserialize JSON Object and Transform Object to exportable
         $orderData = $this->getJsonLineAsClass($serializer, $output);
 
-        // TODO: Serialize Data to output format
+        // Serialize Data to output format
         $output->writeln("\n<fg=green>Serializing Data...</>");
         $serializedData = $serializer->serialize($orderData, $output_format);
         $output->writeln("<fg=green>Done</>");
