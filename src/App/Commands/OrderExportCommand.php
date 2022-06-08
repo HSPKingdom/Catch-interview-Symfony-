@@ -4,6 +4,7 @@ namespace App\App\Commands;
 
 use App\Controller\DTO\OrderInformation;
 use App\Service\Serializer\DTOSerializer;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -85,11 +86,20 @@ class OrderExportCommand extends Command
         // Get JSON Line file from URL
         $output->writeln("\n<fg=green>Reading File from :<href=" . $this->inputJsonLine . ">"
             . $this->inputJsonLine . "</>...</>");
-        $json_file = fopen($this->inputJsonLine, "r");
 
-        // Open File stream and read line by line
-        if ($json_file) {
-            while (($line = fgets($json_file)) != false) {
+        // Return error if file format is not JSON Line
+        if (($path_info = pathinfo($this->inputJsonLine, PATHINFO_EXTENSION)) != "jsonl"){
+            $output->writeln("\n<error>Error</error>");
+            $output->writeln("\n<error>File format received: ".$path_info."</error>");
+            $output->writeln("<error>This application only supports JSONL format as input file</error>");
+            $output->writeln("<error>Please update the input source under .env</error>");
+            die();
+        }
+
+        if ( file_exists($this->inputJsonLine) && ($file_stream = fopen($this->inputJsonLine, "rb"))!==false ){
+
+            // Open File stream and read line by line
+            while (($line = stream_get_line($file_stream, 20480, "\n")) != false) {
 
                 // Deserialize
                 $orderInformation = $serializer->deserialize($line, OrderInformation::class, 'json');
@@ -108,13 +118,17 @@ class OrderExportCommand extends Command
 
 
             }
-            fclose($json_file);
+            fclose($file_stream);
 
             $output->writeln("<fg=green>Done</>");
         }
-
+        else{
+            $output->writeln("\n<error>Error</error>");
+            $output->writeln("\n<error>Could not open file: ".$this->inputJsonLine."</error>");
+            $output->writeln("<error>Please check the input source path under .env</error>");
+            die();
+        }
         return $serializedOrders;
-
     }
 
     /**
