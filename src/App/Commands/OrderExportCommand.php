@@ -96,9 +96,10 @@ class OrderExportCommand extends Command
             die();
         }
 
+        // Read file content
         if ( file_exists($this->inputJsonLine) && ($file_stream = fopen($this->inputJsonLine, "rb"))!==false ){
 
-            // Open File stream and read line by line
+            // Reading line by line
             while (($line = stream_get_line($file_stream, 20480, "\n")) != false) {
 
                 // Deserialize
@@ -116,12 +117,12 @@ class OrderExportCommand extends Command
                     $output->writeln("<fg=green>Order " . $orderExport->getOrderId() . " Processed</fg=green>");
                 }
 
-
             }
             fclose($file_stream);
 
             $output->writeln("<fg=green>Done</>");
         }
+        // Return error if file cannot be opened
         else{
             $output->writeln("\n<error>Error</error>");
             $output->writeln("\n<error>Could not open file: ".$this->inputJsonLine."</error>");
@@ -148,7 +149,7 @@ class OrderExportCommand extends Command
 
         $output->writeln("\n<fg=green>Exporting to file ".$fileLocation."</>");
 
-        //
+        // Write to File
         $exportFile = fopen($fileLocation, 'w');
         while ($fileSize > $fileStartPosition) {
 

@@ -23,4 +23,7 @@ composer install
 ## How to run
 ```bash
 symfony console app:export-order <output_format>
+  <output_format> : 
+      default: csv
+      supports: csv, yaml, json, xml
 ```
