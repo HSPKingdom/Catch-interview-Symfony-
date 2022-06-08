@@ -97,9 +97,9 @@ class OrderExportCommand extends Command
         }
 
         // Read file content
-        if ( file_exists($this->inputJsonLine) && ($file_stream = fopen($this->inputJsonLine, "rb"))!==false ){
+        if (($file_stream = fopen($this->inputJsonLine, "r"))!==false ){
 
-            // Reading line by line
+            // Reading lines by line
             while (($line = stream_get_line($file_stream, 20480, "\n")) != false) {
 
                 // Deserialize
@@ -142,6 +142,8 @@ class OrderExportCommand extends Command
      */
     public function writeToFile(OutputInterface $output, $output_format, $serializedData)
     {
+        unset($serializedData[0]);
+
         $fileLocation = $this->outputFilePath . $this->outputFilename . "." . $output_format;
         $fileStartPosition = 0;
         $fileReadSize = 2048;
