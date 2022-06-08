@@ -8,6 +8,7 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -23,9 +24,14 @@ class OrderExportCommand extends Command
     private $outputFilePath = "./public/";
     /** @var string */
     private $outputFilename = "out";
+    /**
+     * @var string
+     */
+    private $outputFileLocation = "./public/out.";
 
     public function __construct()
     {
+        // Get input file from env variable
         $this->inputJsonLine = $_ENV['JSON_LINE_INPUT'];
         parent::__construct();
     }
@@ -49,6 +55,7 @@ class OrderExportCommand extends Command
             $output->writeln("<error>Output format not supported, please try again!</error>");
             return 0;   // Exit
         }
+        $this->outputFileLocation .= $output_format;
 
         // Initialize Serializer
         $serializer = new DTOSerializer();
@@ -79,7 +86,6 @@ class OrderExportCommand extends Command
      */
     public function getJsonLineAsClass(DTOSerializer $serializer, OutputInterface $output): array
     {
-
         // Array for Export orders
         $serializedOrders = array();
 
@@ -140,17 +146,16 @@ class OrderExportCommand extends Command
      * @param $serializedData
      * @return void
      */
-    public function writeToFile(OutputInterface $output, $output_format, $serializedData)
+    public function writeToFile(OutputInterface $output, $serializedData)
     {
-        $fileLocation = $this->outputFilePath . $this->outputFilename . "." . $output_format;
         $fileStartPosition = 0;
         $fileReadSize = 2048;
         $fileSize = strlen($serializedData);
 
-        $output->writeln("\n<fg=green>Exporting to file ".$fileLocation."</>");
+        $output->writeln("\n<fg=green>Exporting to file ".$this->outputFileLocation."</>");
 
         // Write to File
-        $exportFile = fopen($fileLocation, 'w');
+        $exportFile = fopen($this->outputFileLocation, 'w');
         while ($fileSize > $fileStartPosition) {
 
             // Input data into file
