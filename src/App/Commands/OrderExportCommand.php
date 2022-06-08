@@ -104,15 +104,14 @@ class OrderExportCommand extends Command
                 // If the total order value is 0, skipped in the export queue
                 if ($orderExport->getTotalOrderValue() == 0) {
                     $output->writeln("<comment>Order " . $orderExport->getOrderId() . " skipped, Total order value = 0</>");
-                } // Add it in the export queue
+                } // Add it in the export to file
                 else {
-
                     $output->writeln("\n<fg=green>Processing Order " . $orderExport->getOrderId() . "...</fg=green>");
 
                     // Serialize Data
                     $serializedData = $serializer->serialize($orderExport, $this->output_format);
 
-                    // Ignore CSV header if not the first run
+                    // Ignore CSV header if not the first line of data
                     if ($firstLine and $this->output_format=="csv"){
                         $firstLine = False;
                     }
@@ -152,7 +151,7 @@ class OrderExportCommand extends Command
     public function writeToFile(OutputInterface $output, $serializedData)
     {
         $fileStartPosition = 0;
-        $fileReadSize = 1024;
+        $fileWriteSize = 1024;
         $fileSize = strlen($serializedData);
 
         $output->writeln("<fg=green>Exporting to file</>");
@@ -162,10 +161,10 @@ class OrderExportCommand extends Command
         while ($fileSize > $fileStartPosition) {
 
             // Input data into file
-            fputs($exportFile, substr($serializedData, $fileStartPosition, $fileReadSize));
+            fputs($exportFile, substr($serializedData, $fileStartPosition, $fileWriteSize));
 
             // Select next writing chunk
-            $fileStartPosition += $fileReadSize;
+            $fileStartPosition += $fileWriteSize;
             if ($fileStartPosition > $fileSize) {
                 $fileStartPosition = $fileSize;
             }
