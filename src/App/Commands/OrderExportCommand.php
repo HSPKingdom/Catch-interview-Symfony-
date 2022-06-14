@@ -46,7 +46,7 @@ class OrderExportCommand extends Command
         // If user argument output format not supported, Display error and exit
         if ($this->output_format != "csv") {
 
-            $output->writeln("<comment>System only accept output format: csv, json, yaml, xml</comment>");
+            $output->writeln("<comment>System only accept output format: csv</comment>");
             $output->writeln("<error>Output format not supported, please try again!</error>");
             return 0;   // Exit
         }
